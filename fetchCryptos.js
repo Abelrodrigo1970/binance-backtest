@@ -68,7 +68,8 @@ const createResultsTable = () => {
             simbolo VARCHAR(10) NOT NULL,
             lucro DECIMAL(20, 10),
             nr_operacoes INT,
-            saldo DECIMAL(20, 10)
+            saldo DECIMAL(20, 10),
+            periodo VARCHAR(10) NOT NULL
         );
     `;
     connection.query(sql, (error) => {
