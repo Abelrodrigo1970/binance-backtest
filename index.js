@@ -14,6 +14,7 @@ const connection = mysql.createConnection({
 // Configurações iniciais
 const INITIAL_CAPITAL = 200; // Capital inicial em USDT
 const TRADE_AMOUNT = 100; // Valor fixo por operação em USDT
+const PERIODO_M = "5m"
 
 // Função para buscar os símbolos do banco de dados
 async function fetchSymbols() {
@@ -38,7 +39,7 @@ async function downloadCandlest(symbol, startTime) {
             const response = await axios.get(`https://api.binance.com/api/v3/klines`, {
                 params: {
                     symbol: symbol,
-                    interval: "5m",
+                    interval: PERIODO_M,
                     limit: 1000,
                     startTime: startTime
                 }
@@ -98,9 +99,9 @@ async function doBacktestForSymbol(symbol) {
     let trades = results.trades;
 
     // Insira os resultados na tabela no banco de dados
-   
-    const insertResultsSql = `INSERT INTO resultados (simbolo, lucro, nr_operacoes, saldo) VALUES (?, ?, ?, ?)`;
-    connection.query(insertResultsSql, [symbol, capital - INITIAL_CAPITAL, trades, capital], (error) => {
+   console.log(PERIODO_M);
+    const insertResultsSql = `INSERT INTO resultados (simbolo, lucro, nr_operacoes, saldo, periodo) VALUES (?, ?, ?, ?, ?)`;
+    connection.query(insertResultsSql, [symbol, capital - INITIAL_CAPITAL, trades, capital, PERIODO_M], (error) => {
         if (error) throw error;
         console.log(`Resultados inseridos para ${symbol}: Lucro: ${capital - INITIAL_CAPITAL} USDT, Operações: ${trades}, Saldo: ${ethBalance}`);
     });
@@ -123,8 +124,8 @@ async function main() {
             console.log(`Processando símbolo: ${symbol}`);
             await doBacktestForSymbol(symbol); // Executa o backtest para cada símbolo
             
-            // Espera 2 minutos antes de continuar para o próximo símbolo
-            await new Promise(resolve => setTimeout(resolve, 10000)); // 600.000 milissegundos = 1 minutos
+            // Espera 10 SEGUNDOS  antes de continuar para o próximo símbolo
+            await new Promise(resolve => setTimeout(resolve, 10000)); // 10.000 milissegundos = 10 segundos 
         }
         
         console.log('Backtest completo para todos os símbolos!');
