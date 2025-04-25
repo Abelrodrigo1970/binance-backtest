@@ -14,7 +14,43 @@ const connection = mysql.createConnection({
 // Configurações iniciais
 const INITIAL_CAPITAL = 200; // Capital inicial em USDT
 const TRADE_AMOUNT = 100; // Valor fixo por operação em USDT
-const PERIODO_M = "5m"
+
+const PERIODO_M = "15m"; // Defina o período desejado
+const totalDays = 90; // Número de dias
+const minutesInADay = 24 * 60; // Número de minutos em um dia
+
+// Função para calcular o número total de velas
+function calculateTotalCandlesticks(period) {
+    let minutesPerCandle;
+
+    // Usa switch para definir minutos por vela com base no período
+    switch (period) {
+        case "5m":
+            minutesPerCandle = 5;
+            break;
+        case "15m":
+            minutesPerCandle = 15;
+            break;
+        case "30m":
+            minutesPerCandle = 30;
+            break;
+        case "1h":
+                minutesPerCandle = 60;
+                break;
+        case "2h":
+                minutesPerCandle = 120;
+                break;
+        default:
+            throw new Error(`Período "${period}" não é suportado.`);
+    }
+
+    // Calcula o total de minutos em 90 dias
+    const totalMinutes = totalDays * minutesInADay;
+
+    // Calcula e retorna o total de velas
+    return totalMinutes / minutesPerCandle;
+}
+
 
 // Função para buscar os símbolos do banco de dados
 async function fetchSymbols() {
@@ -29,7 +65,9 @@ async function fetchSymbols() {
 
 // Função para baixar as velas (candlesticks) de um símbolo específico
 async function downloadCandlest(symbol, startTime) {
-    const totalNeeded = 11220; // Total de velas desejadas (120 dias x 24h x 4 velas)
+    const totalNeeded = calculateTotalCandlesticks(PERIODO_M);
+    console.log(`Total de velas necessárias para ${totalDays} dias com período de ${PERIODO_M}: ${totalNeeded}`);
+
     let allCloses = [];
     const filename = `data/${symbol}_5m.txt`; // Nome do arquivo baseado no símbolo
     console.log(symbol);
@@ -76,7 +114,7 @@ async function downloadCandlest(symbol, startTime) {
 
 // Função para realizar o backtest para um símbolo específico
 async function doBacktestForSymbol(symbol) {
-    const startTime = Date.now() - (120 * 24 * 60 * 60 * 1000); // 120 dias de velas
+    const startTime = Date.now() - (90 * 24 * 60 * 60 * 1000); // 90 dias de velas
     const filename = await downloadCandlest(symbol, startTime);
 
     if (!filename) { // Se o downloadFalhou, retorna para a função calling
