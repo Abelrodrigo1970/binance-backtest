@@ -1,6 +1,6 @@
 function movingAverageCrossoverStrategy(closes, capital, ethBalance, TRADE_AMOUNT, SYMBOL) {
     let sma7 = calculateSMA(closes, 6);
-    let sma20 = calculateSMA(closes, 18);
+    let sma20 = calculateSMA(closes, 21);
     
     let position = null;
     let trades = 0;
